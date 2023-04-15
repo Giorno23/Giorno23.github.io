@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messenger</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
+</head>
+<body>
+    <h1>Simple Messenger</h1>
+    <h2>Chat</h2>
+    <div id="messages"></div>
+    <form id="messageForm">
+        <input type="text" id="senderInput" placeholder="Sender">
+        <input type="text" id="receiverInput" placeholder="Receiver">
+        <input type="text" id="messageInput" placeholder="Message">
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Отправка сообщения
+        document.getElementById('messageForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var sender = document.getElementById('senderInput').value;
+            var receiver = document.getElementById('receiverInput').value;
+            var message = document.getElementById('messageInput').value;
+            if (sender && receiver && message) {
+                socket.emit('send_message', {sender: sender, receiver: receiver, message: message});
+                document.getElementById('senderInput').value = '';
+                document.getElementById('receiverInput').value = '';
+                document.getElementById('messageInput').value = '';
+            }
+        });
+
+        // Прием сообщения
+        socket.on('receive_message', function(data) {
+            var sender = data.sender;
+            var receiver = data.receiver;
+            var message = data.message;
+            var messageElement = document.createElement('p');
+            messageElement.textContent = sender + ' -> ' + receiver + ': ' + message;
+            document.getElementById('messages').appendChild(messageElement);
+        });
+    </script>
+</body>
+</html>
